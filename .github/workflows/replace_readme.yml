@@ -1,0 +1,27 @@
+name: Replace README
+
+on:
+  push:
+  watch:
+    types: [started]
+
+jobs:
+  scheduled:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v2
+      - name: Setup deno
+        uses: denoland/setup-deno@main
+        with:
+          deno-version: v1.x
+      - name: Deno run
+        run:
+          deno run --allow-read --unstable --allow-write processing.ts
+      - name: Git push
+        run: |
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git commit -m 'Update: README.md'
+          git push
