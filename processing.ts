@@ -25,7 +25,7 @@ async function insertInToReadMe(path: string, replacement: string): Promise<void
     await Deno.readTextFile(path)
         .then((data) => {
             if (reg.test(data)) {
-                return data.replace(reg, `$1\n${replacement}\n$3`);
+                return data.replace(reg, `$1${replacement}\n$3`);
             }
             return data + README_ANNOTION(annotationName, replacement);
         })
