@@ -16,12 +16,20 @@ jobs:
         with:
           deno-version: v1.x
       - name: Deno run
-        run:
-          deno run --allow-read --unstable --allow-write processing.ts
-      - name: Git push
+        id: deno_run_step
         run: |
+          deno run --allow-read --unstable --allow-write processing.ts
+          echo "::set-output name=GIT_STATUS::$(git status --porcelain)" 
+      - name: Git push
+        if: ${{ contains(steps.deno_run_step.outputs.GIT_STATUS, 'README.md') && success() }}
+        run: |
+          echo "::notice::README.md has been changed"
+          echo "git_push=true" >> $GITHUB_ENV
           git config --local user.name "github-actions[bot]"
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git add README.md
-          git commit -m 'Update: README.md'
+          git commit -m "Update: README.md in $(date +'%Y-%m-%d')"
           git push
+      - name: Result notice
+        if: ${{ env.git_push != 'true' }}
+        run: echo "::notice::README.md not change"
